@@ -1,11 +1,17 @@
-const COUNT = 24;
+const COUNT = AdventCalendarConfig.doors;
 const STORAGE_KEY = "advent_opened_fullscreen";
 const GRID = document.getElementById("grid");
+const PRIMARY_COLOR = AdventCalendarConfig.primaryColor;
+const SECONDARY_COLOR = AdventCalendarConfig.secondaryColor;
+
+document.documentElement.style.setProperty('--door-bg', AdventCalendarConfig.primaryColor);
+document.documentElement.style.setProperty('--door-color', AdventCalendarConfig.fontColor);
+document.documentElement.style.setProperty('--rows', AdventCalendarConfig.rows);
+document.documentElement.style.setProperty('--columns', AdventCalendarConfig.columns);
+document.documentElement.style.setProperty('--secondary-color', AdventCalendarConfig.secondaryColor);
 
 // --- URL Parameter einlesen ---
 const params = new URLSearchParams(window.location.search);
-// const AUTOMATED = params.get("automated") === "true"; // default = false
-// const RESET = params.get("reset") === "true";
 const IMAGE_DIRECTORY = AdventCalendarConfig.imageDirectory;
 const IMAGE_NAME = AdventCalendarConfig.imageName;
 const AUTOMATED = params.has("automated")
@@ -58,8 +64,15 @@ for (let i = 0; i < COUNT; i++) {
 
 function openDoor(door, i, save) {
     door.classList.add("opened");
-    //door.innerHTML = `<img src="./assets/images/2025/10/bild_${i + 1}.png" alt="Tür ${i + 1}">`;
-    door.innerHTML = `<img src="${getImageDirectory(IMAGE_DIRECTORY, IMAGE_NAME, TODAY)}_${i + 1}.png" alt="Tür ${i + 1}">`;
+    const img = document.createElement("img");
+    img.src = `${getImageDirectory(IMAGE_DIRECTORY, IMAGE_NAME, TODAY)}_${i + 1}.png`;
+    img.alt = `Tür ${i + 1}`;
+    img.onerror = () => {
+        door.style.background = SECONDARY_COLOR;
+        img.remove();
+    };
+    door.innerHTML = "";
+    door.appendChild(img);
     if (save) {
         OPENED.add(i);
         localStorage.setItem(STORAGE_KEY, JSON.stringify([...OPENED]));
